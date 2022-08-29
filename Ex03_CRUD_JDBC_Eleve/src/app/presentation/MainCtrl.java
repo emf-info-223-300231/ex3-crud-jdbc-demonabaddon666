@@ -2,10 +2,14 @@ package app.presentation;
 
 import app.beans.Personne;
 import app.exceptions.MyDBException;
+import app.helpers.DateTimeLib;
 import app.helpers.JfxPopup;
 import app.workers.DbWorker;
 import java.net.URL;
+import java.util.Calendar;
 import java.util.ResourceBundle;
+
+import app.workers.PersonneManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -15,8 +19,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import java.io.File;
 import app.workers.DbWorkerItf;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 
 /**
@@ -34,6 +36,7 @@ public class MainCtrl implements Initializable {
   final static private TypesDB DB_TYPE = TypesDB.MYSQL;
 
   private DbWorkerItf dbWrk;
+  private PersonneManager manPers;
   private boolean modeAjout;
 
   @FXML
@@ -76,12 +79,17 @@ public class MainCtrl implements Initializable {
   public void initialize(URL url, ResourceBundle rb) {
     dbWrk = new DbWorker();
     ouvrirDB();
+    try {
+      manPers = new PersonneManager(dbWrk.lirePersonnes());
+      afficherPersonne(manPers.PrecedentPersonne());
+    } catch (MyDBException e) {
+    }
   }
 
   @FXML
   public void actionPrevious(ActionEvent event) {
     try {
-      afficherPersonne(dbWrk.precedentPersonne());
+      afficherPersonne(manPers.PrecedentPersonne());
     } catch (MyDBException ex) {
       JfxPopup.displayError("ERREUR", "Une erreur s'est produite", ex.getMessage());
     }
@@ -90,7 +98,7 @@ public class MainCtrl implements Initializable {
   @FXML
   public void actionNext(ActionEvent event) {
     try {
-      afficherPersonne(dbWrk.suivantPersonne());
+      afficherPersonne(manPers.suivantPersonne());
     } catch (MyDBException ex) {
       JfxPopup.displayError("ERREUR", "Une erreur s'est produite", ex.getMessage());
     }
@@ -98,19 +106,29 @@ public class MainCtrl implements Initializable {
   
   @FXML
   private void actionEnd(ActionEvent event) {
+    afficherPersonne(manPers.finPersonne());
   }
 
   @FXML
   private void debut(ActionEvent event) {
+    afficherPersonne(manPers.debutPersonne());
   }
 
   @FXML
   private void menuAjouter(ActionEvent event) {
+    btnNext.setVisible(false);
+    btnDebut.setVisible(false);
+    btnPrevious.setVisible(false);
+    btnEnd.setVisible(false);
   }
   
 
   @FXML
   private void menuModifier(ActionEvent event) {
+    btnNext.setVisible(false);
+    btnDebut.setVisible(false);
+    btnPrevious.setVisible(false);
+    btnEnd.setVisible(false);
   }
 
   @FXML
@@ -147,6 +165,13 @@ public class MainCtrl implements Initializable {
     if (p != null) {
       txtPrenom.setText(p.getPrenom());
       txtNom.setText(p.getNom());
+      txtNo.setText(String.valueOf(p.getNoRue()));
+      txtNPA.setText(String.valueOf(p.getNpa()));
+      txtPK.setText(String.valueOf(p.getPkPers()));
+      txtLocalite.setText(p.getLocalite());
+      txtSalaire.setText(String.valueOf(p.getSalaire()));
+      txtRue.setText(p.getRue());
+      dateNaissance.setValue(DateTimeLib.dateToLocalDate(p.getDateNaissance()));
     }
   }
 
@@ -166,7 +191,6 @@ public class MainCtrl implements Initializable {
           System.out.println("Base de données pas définie");
       }
       System.out.println("------- DB OK ----------");
-      afficherPersonne(dbWrk.precedentPersonne());
     } catch (MyDBException ex) {
       JfxPopup.displayError("ERREUR", "Une erreur s'est produite", ex.getMessage());
       System.exit(1);
@@ -174,13 +198,13 @@ public class MainCtrl implements Initializable {
   }
   
     private void rendreVisibleBoutonsDepl(boolean b) {
-    btnDebut.setVisible(b);
-    btnPrevious.setVisible(b);
-    btnNext.setVisible(b);
-    btnEnd.setVisible(b);
-    btnAnnuler.setVisible(!b);
-    btnSauver.setVisible(!b);
-  }
+      btnDebut.setVisible(b);
+      btnPrevious.setVisible(b);
+      btnNext.setVisible(b);
+      btnEnd.setVisible(b);
+      btnAnnuler.setVisible(!b);
+      btnSauver.setVisible(!b);
+    }
 
   private void effacerContenuChamps() {
     txtNom.setText("");

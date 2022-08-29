@@ -1044,11 +1044,9 @@ public class DateTimeLib {
    * @return l'objet LocalDate correspondant à la date de type Date.
    */
   public static LocalDate dateToLocalDate(Date date) {
-    if (date != null) {
-      return Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
-    } else {
-      return null;
-    }
+    return date != null ?
+            Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate()
+              : null;
   }
 
   /**

@@ -3,7 +3,12 @@ package app.workers;
 import app.beans.Personne;
 import app.exceptions.MyDBException;
 import app.helpers.SystemLib;
+import com.mysql.cj.jdbc.result.ResultSetFactory;
+
+import javax.swing.plaf.nimbus.State;
 import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -11,7 +16,6 @@ import java.util.Properties;
 public class DbWorker implements DbWorkerItf {
 
     private Connection dbConnexion;
-    private List<Personne> listePersonnes;
     private int index = 0;
 
     /**
@@ -22,8 +26,8 @@ public class DbWorker implements DbWorkerItf {
 
     @Override
     public void connecterBdMySQL(String nomDB) throws MyDBException {
-        final String url_local = "jdbc:mysql://localhost:3306/" + nomDB;
-        final String url_remote = "jdbc:mysql://LAPEMFB37-21.edu.net.fr.ch:3306/" + nomDB;
+        final String url_remote = "jdbc:mysql://localhost:3306/" + nomDB;
+        //final String url_remote = "jdbc:mysql://LAPEMFB37-21.edu.net.fr.ch:3306/" + nomDB;
         final String user = "root";
         final String password = "emf123";
 
@@ -71,23 +75,68 @@ public class DbWorker implements DbWorkerItf {
     }
 
     public List<Personne> lirePersonnes() throws MyDBException {
-        listePersonnes = new ArrayList<>();
-        
+        List<Personne> listePersonnes = new ArrayList<>();
+        try {
+            Statement stmt = dbConnexion.createStatement();
+            ResultSet res = stmt.executeQuery("SELECT * FROM t_personne");
+            while (res.next()){
+               listePersonnes.add(
+                    new Personne(
+                        res.getInt("PK_PERS"),
+                        res.getString("Nom"),
+                        res.getString("Prenom"),
+                        new java.util.Date(res.getDate("Date_Naissance").getTime()),
+                        res.getInt("No_rue"),
+                        res.getString("Rue"),
+                        res.getInt("NPA"),
+                        res.getString("Ville"),
+                        res.getByte("Actif") == 1,
+                        res.getDouble("Salaire"),
+                        new java.util.Date(res.getDate("date_modif").getTime())
+                    )
+                );
+            }
+        } catch (SQLException e) {
+            throw new MyDBException("lirePersonnes",e.getMessage());
+        }
         return listePersonnes;
     }
 
-    @Override
-    public Personne precedentPersonne() throws MyDBException {
 
+    @Override
+    public void creer(Personne p) throws MyDBException {
+        try {
+            PreparedStatement stmt = dbConnexion.prepareStatement(
+                    "INSERT INTO t_personne VALUES (DEFAULT,?,?,?,?,?,?,?,?,?,?,DEFAULT);"
+            );
+            stmt.setString(1, p.getPrenom());
+            stmt.setString(2, p.getPrenom());
+            stmt.setDate(3, new Date(p.getDateNaissance().getTime()));
+            stmt.setInt(4,p.getNoRue());
+            stmt.setString(5,p.getRue());
+            stmt.setInt(6,p.getNpa());
+            stmt.setString(7,p.getLocalite());
+            stmt.setByte(8, (byte) (p.isActif() ? 1 : 0));
+            stmt.setDouble(9,p.getSalaire());
+            stmt.setTimestamp(10,new Timestamp((new java.util.Date()).getTime()));
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new MyDBException("creer",e.getMessage());
+        }
+    }
+
+    @Override
+    public Personne lire(int lastPK) {
         return null;
+    }
+
+    @Override
+    public void modifier(Personne p1) {
 
     }
 
     @Override
-    public Personne suivantPersonne() throws MyDBException {
-
-        return null;
+    public void effacer(Personne p) {
 
     }
-
 }
