@@ -2,6 +2,7 @@ package app.workers;
 
 import app.beans.Personne;
 import app.exceptions.MyDBException;
+import app.helpers.DateTimeLib;
 import app.helpers.SystemLib;
 import com.mysql.cj.jdbc.result.ResultSetFactory;
 
@@ -126,12 +127,55 @@ public class DbWorker implements DbWorkerItf {
     }
 
     @Override
-    public Personne lire(int lastPK) {
-        return null;
+    public Personne lire(int pk) throws MyDBException {
+        Statement stmt = null;
+        try {
+            stmt = dbConnexion.createStatement();
+            ResultSet res =
+                    stmt.executeQuery("SELECT * FROM t_personne " +
+                                            "WHERE PK_PERS = "+pk+";");
+            return res.next() ? new Personne(
+                    res.getInt("PK_PERS"),
+                    res.getString("Nom"),
+                    res.getString("Prenom"),
+                    new java.util.Date(res.getDate("Date_Naissance").getTime()),
+                    res.getInt("No_rue"),
+                    res.getString("Rue"),
+                    res.getInt("NPA"),
+                    res.getString("Ville"),
+                    res.getByte("Actif") == 1,
+                    res.getDouble("Salaire"),
+                    new java.util.Date(res.getDate("date_modif").getTime())
+            ) :  null;
+        } catch (SQLException e) {
+            throw new MyDBException("lire",e.getMessage());
+        }
     }
 
     @Override
-    public void modifier(Personne p1) {
+    public void modifier(Personne p) throws MyDBException {
+        try {
+            PreparedStatement stmt = dbConnexion.prepareStatement(
+                    "UPDATE t_personne SET "
+                    +  "Prenom = ?,"
+                    +  "Nom = ?,"
+                    +  "Date_naissance = ?,"
+                    +  "No_rue = ?,"
+                    +  "Rue = ?,"
+                    +  "NPA = ?,"
+                    +  "Ville = ?,"
+                    +  "Actif = ?,"
+                    +  "Salaire = ?,"
+                    +  "date_modif = ?,"
+                    +  "no_modif = (SELECT no_modif FROM t_personne WHERE PK_PERS = ?)"
+                    +  "WHERE PK_PERS = ?"
+            );
+            stmt.setString(1,p.getPrenom());
+            stmt.setString(1,p.getNom());
+            stmt.setDate(1, new Date(p.getDateNaissance().getTime()));
+        } catch (SQLException e) {
+            throw new MyDBException("modifier",e.getMessage());
+        }
 
     }
 

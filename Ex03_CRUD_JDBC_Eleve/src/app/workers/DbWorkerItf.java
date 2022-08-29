@@ -13,9 +13,9 @@ public interface DbWorkerItf {
 
   void creer(Personne federer) throws MyDBException;
 
-  Personne lire(int lastPK);
+  Personne lire(int lastPK) throws MyDBException;
 
-  void modifier(Personne p1);
+  void modifier(Personne p1) throws MyDBException;
 
   void effacer(Personne p);
 
