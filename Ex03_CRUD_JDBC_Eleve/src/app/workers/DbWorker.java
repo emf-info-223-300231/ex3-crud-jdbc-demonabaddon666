@@ -27,9 +27,9 @@ public class DbWorker implements DbWorkerItf {
 
     @Override
     public void connecterBdMySQL(String nomDB) throws MyDBException {
-        //final String url_remote = "jdbc:mysql://localhost:3306/" + nomDB;
-        final String url_remote = "jdbc:mysql://172.23.85.187:3306/" + nomDB;
-        final String user = "223";
+        final String url_remote = "jdbc:mysql://localhost:3306/" + nomDB;
+        //final String url_remote = "jdbc:mysql://172.23.85.187:3306/" + nomDB;
+        final String user = "root";
         final String password = "emf123";
 
         System.out.println("url:" + url_remote);
@@ -122,7 +122,7 @@ public class DbWorker implements DbWorkerItf {
             stmt.setByte(8, (byte) (p.isActif() ? 1 : 0));
             stmt.setDouble(9,p.getSalaire());
             stmt.setTimestamp(10,new Timestamp((new java.util.Date()).getTime()));
-            stmt.executeUpdate();
+            if(!(stmt.executeUpdate() > 0)) throw new MyDBException("creer","Pas de création");
             Statement st = dbConnexion.createStatement();
             ResultSet res = st.executeQuery("SELECT PK_PERS FROM t_personne ORDER BY PK_PERS DESC LIMIT 1");
             p.setPkPers(res.next() ? res.getInt("PK_PERS") : -1);
@@ -161,32 +161,34 @@ public class DbWorker implements DbWorkerItf {
     public void modifier(Personne p) throws MyDBException {
         try {
             PreparedStatement stmt = dbConnexion.prepareStatement(
-                    "UPDATE t_personne SET "
-                    +  " Prenom = ?,"
-                    +  " Nom = ?,"
-                    +  " Date_naissance = ?,"
-                    +  " No_rue = ?,"
-                    +  " Rue = ?,"
-                    +  " NPA = ?,"
-                    +  " Ville = ?,"
-                    +  " Actif = ?,"
-                    +  " Salaire = ?,"
-                    +  " date_modif = ?,"
-                    +  " no_modif = no_modif+1"
-                    +  " WHERE PK_PERS = ?"
+                    "UPDATE t_personne a" +
+                            " INNER JOIN t_personne b ON b.PK_PERS = ? SET  "
+                    +  " a.Prenom = ?,"
+                    +  " a.Nom = ?,"
+                    +  " a.Date_naissance = ?,"
+                    +  " a.No_rue = ?,"
+                    +  " a.Rue = ?,"
+                    +  " a.NPA = ?,"
+                    +  " a.Ville = ?,"
+                    +  " a.Actif = ?,"
+                    +  " a.Salaire = ?,"
+                    +  " a.date_modif = ?,"
+                    +  " a.no_modif = b.no_modif+1"
+                    +  " WHERE a.PK_PERS = ?"
             );
-            stmt.setString(1,p.getPrenom());
-            stmt.setString(2,p.getNom());
-            stmt.setDate(3, new Date(p.getDateNaissance().getTime()));
-            stmt.setInt(4,p.getNoRue());
-            stmt.setString(5,p.getRue());
-            stmt.setInt(6,p.getNpa());
-            stmt.setString(7,p.getLocalite());
-            stmt.setByte(8, (byte) (p.isActif() ? 1 : 0));
-            stmt.setDouble(9,p.getSalaire());
-            stmt.setTimestamp(10,new Timestamp((new java.util.Date()).getTime()));
-            stmt.setDouble(11,p.getPkPers());
-            stmt.executeUpdate();
+            stmt.setDouble(1,p.getPkPers());
+            stmt.setString(2,p.getPrenom());
+            stmt.setString(3,p.getNom());
+            stmt.setDate(4, new Date(p.getDateNaissance().getTime()));
+            stmt.setInt(5,p.getNoRue());
+            stmt.setString(6,p.getRue());
+            stmt.setInt(7,p.getNpa());
+            stmt.setString(8,p.getLocalite());
+            stmt.setByte(9, (byte) (p.isActif() ? 1 : 0));
+            stmt.setDouble(10,p.getSalaire());
+            stmt.setTimestamp(11,new Timestamp((new java.util.Date()).getTime()));
+            stmt.setDouble(12,p.getPkPers());
+            if(!(stmt.executeUpdate() > 0)) throw new MyDBException("modifier","Pas de modification");
         } catch (SQLException e) {
             throw new MyDBException("modifier",e.getMessage());
         }
@@ -200,7 +202,7 @@ public class DbWorker implements DbWorkerItf {
                     "DELETE FROM t_personne WHERE PK_PERS = ?"
             );
             stmt.setInt(1,p.getPkPers());
-            stmt.executeUpdate();
+            if(!(stmt.executeUpdate() > 0)) throw new MyDBException("effacer","Aucun effacement");
         } catch (SQLException e) {
             throw new MyDBException("effacer",e.getMessage());
         }
