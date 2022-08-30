@@ -78,24 +78,26 @@ public class DbWorker implements DbWorkerItf {
     public List<Personne> lirePersonnes() throws MyDBException {
         List<Personne> listePersonnes = new ArrayList<>();
         try {
-            Statement stmt = dbConnexion.createStatement();
-            ResultSet res = stmt.executeQuery("SELECT * FROM t_personne");
-            while (res.next()){
-               listePersonnes.add(
-                    new Personne(
-                        res.getInt("PK_PERS"),
-                        res.getString("Nom"),
-                        res.getString("Prenom"),
-                        new java.util.Date(res.getDate("Date_Naissance").getTime()),
-                        res.getInt("No_rue"),
-                        res.getString("Rue"),
-                        res.getInt("NPA"),
-                        res.getString("Ville"),
-                        res.getByte("Actif") == 1,
-                        res.getDouble("Salaire"),
-                        new java.util.Date(res.getDate("date_modif").getTime())
-                    )
-                );
+            if(dbConnexion != null) {
+                Statement stmt = dbConnexion.createStatement();
+                ResultSet res = stmt.executeQuery("SELECT * FROM t_personne");
+                while (res.next()) {
+                    listePersonnes.add(
+                            new Personne(
+                                    res.getInt("PK_PERS"),
+                                    res.getString("Nom"),
+                                    res.getString("Prenom"),
+                                    new java.util.Date(res.getDate("Date_Naissance").getTime()),
+                                    res.getInt("No_rue"),
+                                    res.getString("Rue"),
+                                    res.getInt("NPA"),
+                                    res.getString("Ville"),
+                                    res.getByte("Actif") == 1,
+                                    res.getDouble("Salaire"),
+                                    new java.util.Date(res.getDate("date_modif").getTime())
+                            )
+                    );
+                }
             }
         } catch (SQLException e) {
             throw new MyDBException("lirePersonnes",e.getMessage());
@@ -121,6 +123,9 @@ public class DbWorker implements DbWorkerItf {
             stmt.setDouble(9,p.getSalaire());
             stmt.setTimestamp(10,new Timestamp((new java.util.Date()).getTime()));
             stmt.executeUpdate();
+            Statement st = dbConnexion.createStatement();
+            ResultSet res = st.executeQuery("SELECT PK_PERS FROM t_personne ORDER BY PK_PERS DESC LIMIT 1");
+            p.setPkPers(res.next() ? res.getInt("PK_PERS") : -1);
         } catch (SQLException e) {
             throw new MyDBException("creer",e.getMessage());
         }
@@ -157,18 +162,18 @@ public class DbWorker implements DbWorkerItf {
         try {
             PreparedStatement stmt = dbConnexion.prepareStatement(
                     "UPDATE t_personne SET "
-                    +  "Prenom = ?,"
-                    +  "Nom = ?,"
-                    +  "Date_naissance = ?,"
-                    +  "No_rue = ?,"
-                    +  "Rue = ?,"
-                    +  "NPA = ?,"
-                    +  "Ville = ?,"
-                    +  "Actif = ?,"
-                    +  "Salaire = ?,"
-                    +  "date_modif = ?,"
-                    +  "no_modif = ((SELECT no_modif FROM t_personne WHERE PK_PERS = ?) + 1)"
-                    +  "WHERE PK_PERS = ?"
+                    +  " Prenom = ?,"
+                    +  " Nom = ?,"
+                    +  " Date_naissance = ?,"
+                    +  " No_rue = ?,"
+                    +  " Rue = ?,"
+                    +  " NPA = ?,"
+                    +  " Ville = ?,"
+                    +  " Actif = ?,"
+                    +  " Salaire = ?,"
+                    +  " date_modif = ?,"
+                    +  " no_modif = no_modif+1"
+                    +  " WHERE PK_PERS = ?"
             );
             stmt.setString(1,p.getPrenom());
             stmt.setString(2,p.getNom());
@@ -176,10 +181,10 @@ public class DbWorker implements DbWorkerItf {
             stmt.setInt(4,p.getNoRue());
             stmt.setString(5,p.getRue());
             stmt.setInt(6,p.getNpa());
-            stmt.setByte(7, (byte) (p.isActif() ? 1 : 0));
-            stmt.setDouble(8,p.getSalaire());
-            stmt.setTimestamp(9,new Timestamp((new java.util.Date()).getTime()));
-            stmt.setDouble(10,p.getPkPers());
+            stmt.setString(7,p.getLocalite());
+            stmt.setByte(8, (byte) (p.isActif() ? 1 : 0));
+            stmt.setDouble(9,p.getSalaire());
+            stmt.setTimestamp(10,new Timestamp((new java.util.Date()).getTime()));
             stmt.setDouble(11,p.getPkPers());
             stmt.executeUpdate();
         } catch (SQLException e) {

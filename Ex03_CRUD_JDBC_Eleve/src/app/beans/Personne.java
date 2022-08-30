@@ -108,7 +108,7 @@ public class Personne {
   }
 
   public int getPkPers() {
-    return pkPers;
+    return pkPers > 0 ? pkPers : -1;
   }
 
   public void setPkPers( int pk ) {

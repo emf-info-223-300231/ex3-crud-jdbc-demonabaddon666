@@ -7,6 +7,7 @@ import app.helpers.JfxPopup;
 import app.workers.DbWorker;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.ResourceBundle;
 
 import app.workers.PersonneManager;
@@ -70,7 +71,12 @@ public class MainCtrl implements Initializable {
   @FXML
   private Button btnAnnuler;
   @FXML
-  private DatePicker dateNaissance;  
+  private DatePicker dateNaissance;
+
+  private enum Option{
+    CREATE,MODIFY,OTH
+  }
+  private Option opt = Option.OTH;
 
   /*
    * METHODES NECESSAIRES A LA VUE
@@ -116,15 +122,29 @@ public class MainCtrl implements Initializable {
 
   @FXML
   private void menuAjouter(ActionEvent event) {
+    btnSauver.setVisible(true);
     btnNext.setVisible(false);
     btnDebut.setVisible(false);
     btnPrevious.setVisible(false);
     btnEnd.setVisible(false);
+    opt = Option.CREATE;
   }
   
 
   @FXML
   private void menuModifier(ActionEvent event) {
+    btnSauver.setVisible(true);
+    btnNext.setVisible(false);
+    btnDebut.setVisible(false);
+    btnPrevious.setVisible(false);
+    btnEnd.setVisible(false);
+    opt = Option.MODIFY;
+  }
+
+  @FXML
+  private void menuEffacer(ActionEvent event) {
+    btnAnnuler.setVisible(true);
+    btnAnnuler.setText("Effacer");
     btnNext.setVisible(false);
     btnDebut.setVisible(false);
     btnPrevious.setVisible(false);
@@ -132,21 +152,68 @@ public class MainCtrl implements Initializable {
   }
 
   @FXML
-  private void menuEffacer(ActionEvent event) {
-
-  }
-
-  @FXML
   private void menuQuitter(ActionEvent event) {
+    quitter();
   }
 
   @FXML
   private void annulerPersonne(ActionEvent event) {
+    try {
+      dbWrk.effacer(manPers.courantPersonne());
+      btnSauver.setVisible(false);
+      btnNext.setVisible(true);
+      btnDebut.setVisible(true);
+      btnPrevious.setVisible(true);
+      btnEnd.setVisible(true);
+      manPers.setPersonnes(dbWrk.lirePersonnes());
+    } catch (MyDBException e) {
+      throw new RuntimeException(e);
+    }
+    afficherPersonne(manPers.debutPersonne());
   }
 
   @FXML
   private void sauverPersonne(ActionEvent event) {
-
+    try {
+      if (Option.CREATE == opt) {
+        dbWrk.creer(new Personne(
+                Integer.parseInt(txtPK.getText()),
+                txtNom.getText(),
+                txtPrenom.getText(),
+                DateTimeLib.localDateToDate(dateNaissance.getValue()),
+                Integer.parseInt(txtNo.getText()),
+                txtRue.getText(),
+                Integer.parseInt(txtNPA.getText()),
+                txtLocalite.getText(),
+                ckbActif.isSelected(),
+                Double.parseDouble(txtSalaire.getText()),
+                new Date()
+        ));
+      } else if (Option.MODIFY == opt) {
+          dbWrk.modifier(new Personne(
+                  manPers.courantPersonne().getPkPers(),
+                  txtNom.getText(),
+                  txtPrenom.getText(),
+                  DateTimeLib.localDateToDate(dateNaissance.getValue()),
+                  Integer.parseInt(txtNo.getText()),
+                  txtRue.getText(),
+                  Integer.parseInt(txtNPA.getText()),
+                  txtLocalite.getText(),
+                  ckbActif.isSelected(),
+                  Double.parseDouble(txtSalaire.getText()),
+                  new Date()
+          ));
+      }
+      btnSauver.setVisible(false);
+      btnNext.setVisible(true);
+      btnDebut.setVisible(true);
+      btnPrevious.setVisible(true);
+      btnEnd.setVisible(true);
+      manPers.setPersonnes(dbWrk.lirePersonnes());
+    } catch (MyDBException e) {
+      throw new RuntimeException(e);
+    }
+    rendreVisibleBoutonsDepl(true);
   }
 
   public void quitter() {
@@ -191,6 +258,8 @@ public class MainCtrl implements Initializable {
           System.out.println("Base de données pas définie");
       }
       System.out.println("------- DB OK ----------");
+      btnAnnuler.setVisible(false);
+      btnSauver.setVisible(false);
     } catch (MyDBException ex) {
       JfxPopup.displayError("ERREUR", "Une erreur s'est produite", ex.getMessage());
       System.exit(1);

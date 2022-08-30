@@ -30,7 +30,7 @@ public class DbWorkerTest {
 
   @AfterClass
   public static void tearDownClass() throws Exception {
-    // dbWrk.deconnecter();
+    dbWrk.deconnecter();
   }
 
   @Test
