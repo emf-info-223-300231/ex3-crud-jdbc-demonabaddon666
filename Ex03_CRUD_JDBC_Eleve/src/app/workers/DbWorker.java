@@ -167,7 +167,7 @@ public class DbWorker implements DbWorkerItf {
                     +  "Actif = ?,"
                     +  "Salaire = ?,"
                     +  "date_modif = ?,"
-                    +  "no_modif = (SELECT no_modif FROM t_personne WHERE PK_PERS = ?)"
+                    +  "no_modif = ((SELECT no_modif FROM t_personne WHERE PK_PERS = ?) + 1)"
                     +  "WHERE PK_PERS = ?"
             );
             stmt.setString(1,p.getPrenom());
@@ -181,6 +181,7 @@ public class DbWorker implements DbWorkerItf {
             stmt.setTimestamp(9,new Timestamp((new java.util.Date()).getTime()));
             stmt.setDouble(10,p.getPkPers());
             stmt.setDouble(11,p.getPkPers());
+            stmt.executeUpdate();
         } catch (SQLException e) {
             throw new MyDBException("modifier",e.getMessage());
         }
@@ -188,7 +189,15 @@ public class DbWorker implements DbWorkerItf {
     }
 
     @Override
-    public void effacer(Personne p) {
-
+    public void effacer(Personne p) throws MyDBException {
+        try {
+            PreparedStatement stmt = dbConnexion.prepareStatement(
+                    "DELETE FROM t_personne WHERE PK_PERS = ?"
+            );
+            stmt.setInt(1,p.getPkPers());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new MyDBException("effacer",e.getMessage());
+        }
     }
 }

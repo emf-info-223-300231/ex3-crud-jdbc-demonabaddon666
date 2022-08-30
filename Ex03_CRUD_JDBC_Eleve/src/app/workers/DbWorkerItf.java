@@ -17,7 +17,7 @@ public interface DbWorkerItf {
 
   void modifier(Personne p1) throws MyDBException;
 
-  void effacer(Personne p);
+  void effacer(Personne p) throws MyDBException;
 
   List<Personne> lirePersonnes() throws MyDBException;
 }
