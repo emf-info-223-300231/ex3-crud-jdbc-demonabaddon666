@@ -171,8 +171,16 @@ public class DbWorker implements DbWorkerItf {
                     +  "WHERE PK_PERS = ?"
             );
             stmt.setString(1,p.getPrenom());
-            stmt.setString(1,p.getNom());
-            stmt.setDate(1, new Date(p.getDateNaissance().getTime()));
+            stmt.setString(2,p.getNom());
+            stmt.setDate(3, new Date(p.getDateNaissance().getTime()));
+            stmt.setInt(4,p.getNoRue());
+            stmt.setString(5,p.getRue());
+            stmt.setInt(6,p.getNpa());
+            stmt.setByte(7, (byte) (p.isActif() ? 1 : 0));
+            stmt.setDouble(8,p.getSalaire());
+            stmt.setTimestamp(9,new Timestamp((new java.util.Date()).getTime()));
+            stmt.setDouble(10,p.getPkPers());
+            stmt.setDouble(11,p.getPkPers());
         } catch (SQLException e) {
             throw new MyDBException("modifier",e.getMessage());
         }
