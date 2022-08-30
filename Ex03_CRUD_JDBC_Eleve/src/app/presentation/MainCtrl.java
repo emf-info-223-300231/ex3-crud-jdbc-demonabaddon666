@@ -122,33 +122,21 @@ public class MainCtrl implements Initializable {
 
   @FXML
   private void menuAjouter(ActionEvent event) {
-    btnSauver.setVisible(true);
-    btnNext.setVisible(false);
-    btnDebut.setVisible(false);
-    btnPrevious.setVisible(false);
-    btnEnd.setVisible(false);
+    rendreVisibleBoutonsDepl(false);
     opt = Option.CREATE;
   }
   
 
   @FXML
   private void menuModifier(ActionEvent event) {
-    btnSauver.setVisible(true);
-    btnNext.setVisible(false);
-    btnDebut.setVisible(false);
-    btnPrevious.setVisible(false);
-    btnEnd.setVisible(false);
+    rendreVisibleBoutonsDepl(false);
     opt = Option.MODIFY;
   }
 
   @FXML
   private void menuEffacer(ActionEvent event) {
-    btnAnnuler.setVisible(true);
     btnAnnuler.setText("Effacer");
-    btnNext.setVisible(false);
-    btnDebut.setVisible(false);
-    btnPrevious.setVisible(false);
-    btnEnd.setVisible(false);
+    rendreVisibleBoutonsDepl(false);
   }
 
   @FXML
@@ -160,11 +148,7 @@ public class MainCtrl implements Initializable {
   private void annulerPersonne(ActionEvent event) {
     try {
       dbWrk.effacer(manPers.courantPersonne());
-      btnSauver.setVisible(false);
-      btnNext.setVisible(true);
-      btnDebut.setVisible(true);
-      btnPrevious.setVisible(true);
-      btnEnd.setVisible(true);
+      rendreVisibleBoutonsDepl(false);
       manPers.setPersonnes(dbWrk.lirePersonnes());
     } catch (MyDBException e) {
       throw new RuntimeException(e);
@@ -204,11 +188,6 @@ public class MainCtrl implements Initializable {
                   new Date()
           ));
       }
-      btnSauver.setVisible(false);
-      btnNext.setVisible(true);
-      btnDebut.setVisible(true);
-      btnPrevious.setVisible(true);
-      btnEnd.setVisible(true);
       manPers.setPersonnes(dbWrk.lirePersonnes());
     } catch (MyDBException e) {
       throw new RuntimeException(e);
@@ -258,8 +237,7 @@ public class MainCtrl implements Initializable {
           System.out.println("Base de données pas définie");
       }
       System.out.println("------- DB OK ----------");
-      btnAnnuler.setVisible(false);
-      btnSauver.setVisible(false);
+      rendreVisibleBoutonsDepl(true);
     } catch (MyDBException ex) {
       JfxPopup.displayError("ERREUR", "Une erreur s'est produite", ex.getMessage());
       System.exit(1);
