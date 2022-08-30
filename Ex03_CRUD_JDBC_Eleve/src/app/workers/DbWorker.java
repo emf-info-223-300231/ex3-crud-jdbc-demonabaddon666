@@ -27,9 +27,9 @@ public class DbWorker implements DbWorkerItf {
 
     @Override
     public void connecterBdMySQL(String nomDB) throws MyDBException {
-        final String url_remote = "jdbc:mysql://localhost:3306/" + nomDB;
-        //final String url_remote = "jdbc:mysql://LAPEMFB37-21.edu.net.fr.ch:3306/" + nomDB;
-        final String user = "root";
+        //final String url_remote = "jdbc:mysql://localhost:3306/" + nomDB;
+        final String url_remote = "jdbc:mysql://172.23.85.187:3306/" + nomDB;
+        final String user = "223";
         final String password = "emf123";
 
         System.out.println("url:" + url_remote);

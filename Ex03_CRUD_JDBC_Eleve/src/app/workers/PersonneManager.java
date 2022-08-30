@@ -26,11 +26,11 @@ public class PersonneManager {
     }
 
     public Personne PrecedentPersonne() throws MyDBException{
-        return listePersonnes.get(index > 0 ? (index = index-1) : 0);
+        return listePersonnes.get(index > 0 ? (--index) : 0);
     }
 
     public Personne suivantPersonne() throws MyDBException {
-        return listePersonnes.get(index < listePersonnes.size()-1 ? (index = index+1) : index);
+        return listePersonnes.get(index < listePersonnes.size()-1 ? (++index) : index);
     }
 
     public void setPersonnes(List<Personne> p){
