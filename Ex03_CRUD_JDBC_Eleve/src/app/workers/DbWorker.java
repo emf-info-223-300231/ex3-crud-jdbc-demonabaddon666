@@ -113,7 +113,7 @@ public class DbWorker implements DbWorkerItf {
                     "INSERT INTO t_personne VALUES (DEFAULT,?,?,?,?,?,?,?,?,?,?,DEFAULT);"
             );
             stmt.setString(1, p.getPrenom());
-            stmt.setString(2, p.getPrenom());
+            stmt.setString(2, p.getNom());
             stmt.setDate(3, new Date(p.getDateNaissance().getTime()));
             stmt.setInt(4,p.getNoRue());
             stmt.setString(5,p.getRue());
