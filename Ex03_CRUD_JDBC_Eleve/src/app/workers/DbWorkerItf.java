@@ -11,7 +11,13 @@ public interface DbWorkerItf {
   void connecterBdAccess( String nomDB ) throws MyDBException;
   void deconnecter() throws MyDBException; 
 
-  Personne precedentPersonne() throws MyDBException;
-  Personne suivantPersonne() throws MyDBException; 
+  void creer(Personne federer) throws MyDBException;
 
+  Personne lire(int lastPK) throws MyDBException;
+
+  void modifier(Personne p1) throws MyDBException;
+
+  void effacer(Personne p) throws MyDBException;
+
+  List<Personne> lirePersonnes() throws MyDBException;
 }

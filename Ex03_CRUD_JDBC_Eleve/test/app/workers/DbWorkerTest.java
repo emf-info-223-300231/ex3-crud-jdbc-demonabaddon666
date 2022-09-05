@@ -25,12 +25,12 @@ public class DbWorkerTest {
   @BeforeClass
   public static void setUpClass() throws Exception {
     dbWrk = new DbWorker();
-    manPers = new PersonneManager();
+    manPers = new PersonneManager(dbWrk.lirePersonnes());
   }
 
   @AfterClass
   public static void tearDownClass() throws Exception {
-    // dbWrk.deconnecter();
+    dbWrk.deconnecter();
   }
 
   @Test
@@ -78,10 +78,12 @@ public class DbWorkerTest {
   }
 
   @Test
-  public void d_testerCreer() throws MyDBException {
+  public void d_testerCreer() throws Exception {
+    DbWorker t = new DbWorker();
+    t.connecterBdMySQL("223_personne_1table");
     System.out.println(SystemLib.getCurrentMethod());
     Personne federer = new Personne(true);
-    dbWrk.creer(federer);
+    t.creer(federer);
     lastPK = federer.getPkPers();
   }
 
